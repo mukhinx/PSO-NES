@@ -1,14 +1,15 @@
 SigmaL = diag(sig_best);
-SigmaL = abs(real(SigmaL));
+SigmaL = real(SigmaL);
+mu = real(mu_best);
 
-xmin = min(xbest);
-xmax = max(xbest);
+xmin = min(mu);
+xmax = max(mu);
 sigmax = max(SigmaL);
 x = [xmin-sigmax:1:xmax+sigmax];
 
 norm = zeros(length(x), length(sig_best));
 for i=1:length(x_true)
-    norm(:,i) = normpdf(x,xbest(i),SigmaL(i));
+    norm(:,i) = normpdf(x, real(mu_best(i)), SigmaL(i));
 end
 
 zprog = [10:10:(length(x_true)*10)];

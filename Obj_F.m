@@ -3,15 +3,15 @@ function[costFunction, gradF, cost2]= Obj_F(sig, bestSolution, MTZ_new_1D, bestF
 %% NES Parameters
 d = length(sig); % dimension of target vector
 A = sqrtm(sig);
-% Cov = diag(sig.^2); % Covariance
 Cov = sig;
-logCov = log(Cov); % log Covariance for objective function
-
-eps = 1.01; % difference coef
+% logCov = log(Cov); % log Covariance for objective function
+detCov = det(Cov);
+eps = 1.1; % difference coef
 n = round(4+3*log(d)); %number of samples fron MC
 %% Calculating CostFunction
 xbest = bestSolution.xbest';
-a = 100000 ; % max function multiplier
+a =  max(Cov(:)); % max function multiplier
+% a = 30;
 fit = zeros(1,n);
 Z = randn(d, n);% 
 X = repmat(xbest,1,n);
@@ -23,13 +23,15 @@ for i = 1 : n
 end
 
 MeanFit = mean(fit);
-first = trace(logCov);
-second = (max(0, MeanFit-eps*bestFunction))^2;
-costFunction = first + a * second; %objective function
+first = sqrt(detCov);
+% second = max(0, (MeanFit-eps*bestFunction)^2);
+second = exp(a*(MeanFit-eps*bestFunction)^2);
+costFunction = first - second; %objective function
 cost2 = second;
 %% Calculating gradient
-dV = inv(Cov);
-dP = 2*a*max(0, MeanFit - eps*bestFunction); %dP/dE, where P is the Penaulty function
+dV = 0.5 * first * inv(Cov)';
+% dP = 2*a*max(0, MeanFit - eps*bestFunction); %dP/dE, where P is the Penaulty function
+dP = 2 * a * second * (MeanFit-eps*bestFunction);
 M = dV;
 
 dE = zeros(d);
